@@ -113,10 +113,12 @@ grafico2 <- reactive({
 
 
 tabla1 <- reactive({
-    table1 <- datos %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n()) %>% 
+    table1 <- nacional() %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
+    # %>% spread(key =`Tipo de licencia (1-7)`,value = Licenciatarios) %>% as.data.frame()
+    table1 <- data.table(table1)
 })
 
-#Render de gráficos
+#Render de gráficos y tablas
 
 output$plot1 <- renderPlotly({
     plot_ly(grafico1(), labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
@@ -134,6 +136,14 @@ output$plot2 <- renderPlotly({
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 })
 
+output$table1 <- renderPlot({
+    ggplot(data = tabla1(), aes(x = `Tipo de licencia (1-7)`, y = Provincia)) +
+        geom_tile(aes(fill = Licenciatarios))+
+        scale_fill_gradient2(low = "#4682B4", mid = "#FFFFFF", high = "#FF0000", midpoint = 1, space = "Lab",
+                             na.value = "grey50", guide = "colourbar")+
+        geom_text(aes(label=Licenciatarios))+
+        theme(legend.position="none")
+})
 
     
     
@@ -196,7 +206,8 @@ output$plot2 <- renderPlotly({
                     box(
                         title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8,
                         fluidRow(
-                            plotlyOutput("plot2",height = 700)
+                            column(plotlyOutput("plot2",height = 700),width = 6),
+                            column(plotOutput("table1"),width = 6)
                         ))
                 )    
             }
