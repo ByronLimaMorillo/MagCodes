@@ -75,9 +75,8 @@ ui <- dashboardPage(
                         valueBoxOutput("total_lic"),
                         valueBoxOutput("lic_activos"),
                         valueBoxOutput("lic_inactivos")    
-                            )
-                    
-                    
+                            ),
+                    uiOutput("u_i3")
                     ),
             tabItem(tabName = "buscador",
                     h2("buscador")),
@@ -100,16 +99,12 @@ nacional <- reactive({
     tabla1
 })
 
-# provincias <- reactive({
-#     prov <- datos %>% filter(Provincias %in% input$provincias)
-# })
-    
-    
+
     
     
 #Desarrollo de Ui's
     
-    output$u_i1<- renderUI({
+    output$u_i1<- renderUI({        #ui de menu indicadores o buscador
         if (input$menu=="indicadores") {
             fluidPage(
                 style = "position: fixed; overflow: visible;",
@@ -128,7 +123,7 @@ nacional <- reactive({
         }
     })
     
-    output$u_i2 <- renderUI({
+    output$u_i2 <- renderUI({   #ui de filtro
         if (!is.null(input$filtro)) {
             if (input$filtro!="Nacional") {
                 fluidPage(
@@ -140,6 +135,35 @@ nacional <- reactive({
             
         }
         
+    })
+    
+    
+    output$u_i3 <- renderUI({   #ui de box de acuerdo a opcion de filtro
+        if(!is.null(input$filtro)){
+            if (input$filtro!="Nacional") {
+                fluidRow(
+                    box(
+                        title = "Licencias Por Tipo Y Provincia",status = 'success',
+                        plotlyOutput("plot3", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                    box(
+                        title = "Licencias Inactivas Por Provincia",status = 'success',
+                        plotlyOutput("plot4", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                    box(
+                        title = "Superficie Por Provincia Y Tipo De Licencia",status = 'primary',width = 12,
+                        plotlyOutput("plot5", height = 700),solidHeader = TRUE,collapsible = TRUE)
+                    
+                ) 
+            }else{
+                fluidRow(
+                    box(
+                        title = "Licenciatarios Por Provincia",status = 'success',
+                        plotlyOutput("plot1", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                    box(
+                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE)
+                )    
+            }
+            
+        }
     })
     
 # Observe de cantones
