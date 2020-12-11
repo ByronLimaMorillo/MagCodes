@@ -93,10 +93,27 @@ ui <- dashboardPage(
 
 server <- function(input, output,session) {
 
-    #Reactives de tablas 
+#Reactives de tablas 
 nacional <- reactive({
     tabla1 <- datos
     tabla1
+})
+
+grafico1 <- reactive({
+    graph1 <- nacional() %>% group_by(Provincia) %>% summarise(Licenciatarios=n())
+    graph1 <- as.data.frame(graph1)
+    graph1
+})
+
+
+#Render de gráficos
+
+output$plot1 <- renderPlotly({
+    plot_ly(graph1, labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
+        add_pie(hole = 0.3) %>%
+        layout(legend = list(orientation = 'h'), 
+               yaxis = list(title = "Porcentaje Licenciatarios Nacional",
+                            showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 })
 
 
@@ -157,9 +174,9 @@ nacional <- reactive({
                 fluidRow(
                     box(
                         title = "Licenciatarios Por Provincia",status = 'success',
-                        plotlyOutput("plot1", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                        plotlyOutput("plot1", height = 500),solidHeader = TRUE,collapsible = TRUE,width = 4),
                     box(
-                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE)
+                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8)
                 )    
             }
             
