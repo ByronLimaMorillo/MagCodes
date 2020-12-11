@@ -141,8 +141,11 @@ output$plot3 <- renderPlot({
     
     ggplot(tabla1(), aes(`Tipo de licencia (1-7)`,Provincia, fill=Licenciatarios)) + 
         geom_tile() +
+        
+        ggtitle("Detalle De Licencias Por Tipo Y Provincia")+
+        theme(plot.title = element_text(hjust = 0.5,size = 17,face = "bold"))+
         geom_text(aes(label=tabla1()$Licenciatarios),colour="white")+ 
-        theme(axis.text.x=element_text(size = 15),axis.text.y=element_text(size = 10))
+        theme(axis.text.x=element_text(size = 15,),axis.text.y=element_text(size = 10))
     
 })
 
