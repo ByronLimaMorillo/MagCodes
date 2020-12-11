@@ -105,15 +105,28 @@ grafico1 <- reactive({
     graph1
 })
 
+grafico2 <- reactive({
+    graph2 <- nacional() %>% filter(`Estado Actual`=="Activa") %>% group_by(Provincia) %>% summarise(Licenciatarios=n())
+    graph2 <- as.data.frame(graph2)
+    graph2
+})
 
 #Render de gráficos
 
 output$plot1 <- renderPlotly({
-    plot_ly(graph1, labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
+    plot_ly(grafico1(), labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
         add_pie(hole = 0.3) %>%
-        layout(legend = list(orientation = 'h'), 
-               yaxis = list(title = "Porcentaje Licenciatarios Nacional",
-                            showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        layout(title = "Porcentaje Licenciatarios Nacional",
+               legend = list(orientation = 'h'), 
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+})
+
+output$plot2 <- renderPlotly({
+    plot_ly(grafico2(), labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
+        add_pie(hole = 0.3) %>%
+        layout(title = "Porcentaje Licenciatarios Nacionales Activos",
+               legend = list(orientation = 'h'), 
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 })
 
 
@@ -174,9 +187,12 @@ output$plot1 <- renderPlotly({
                 fluidRow(
                     box(
                         title = "Licenciatarios Por Provincia",status = 'success',
-                        plotlyOutput("plot1", height = 500),solidHeader = TRUE,collapsible = TRUE,width = 4),
+                        plotlyOutput("plot1", height = 700),solidHeader = TRUE,collapsible = TRUE,width = 4),
                     box(
-                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8)
+                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8,
+                        fluidRow(
+                            plotlyOutput("plot2",height = 700)
+                        ))
                 )    
             }
             
