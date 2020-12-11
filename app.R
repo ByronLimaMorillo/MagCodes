@@ -114,7 +114,6 @@ grafico2 <- reactive({
 
 tabla1 <- reactive({
     table1 <- nacional() %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
-    # %>% spread(key =`Tipo de licencia (1-7)`,value = Licenciatarios) %>% as.data.frame()
     table1 <- data.table(table1)
 })
 
@@ -134,15 +133,17 @@ output$plot2 <- renderPlotly({
         layout(title = "Porcentaje Licenciatarios Nacionales Activos",
                legend = list(orientation = 'h'), 
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    
 })
 
-output$table1 <- renderPlot({
-    ggplot(data = tabla1(), aes(x = `Tipo de licencia (1-7)`, y = Provincia)) +
-        geom_tile(aes(fill = Licenciatarios))+
-        scale_fill_gradient2(low = "#4682B4", mid = "#FFFFFF", high = "#FF0000", midpoint = 1, space = "Lab",
-                             na.value = "grey50", guide = "colourbar")+
-        geom_text(aes(label=Licenciatarios))+
-        theme(legend.position="none")
+output$plot3 <- renderPlot({
+    
+    ggplot(tabla1(), aes(`Tipo de licencia (1-7)`,Provincia, fill=Licenciatarios)) + 
+        geom_tile() +
+        geom_text(aes(label=tabla1()$Licenciatarios),colour="white")+ 
+        theme(axis.text.x=element_text(size = 15),axis.text.y=element_text(size = 10))
+    
 })
 
     
@@ -189,13 +190,13 @@ output$table1 <- renderPlot({
                 fluidRow(
                     box(
                         title = "Licencias Por Tipo Y Provincia",status = 'success',
-                        plotlyOutput("plot3", height = 500),solidHeader = TRUE,collapsible = TRUE),
-                    box(
-                        title = "Licencias Inactivas Por Provincia",status = 'success',
                         plotlyOutput("plot4", height = 500),solidHeader = TRUE,collapsible = TRUE),
                     box(
+                        title = "Licencias Inactivas Por Provincia",status = 'success',
+                        plotlyOutput("plot5", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                    box(
                         title = "Superficie Por Provincia Y Tipo De Licencia",status = 'primary',width = 12,
-                        plotlyOutput("plot5", height = 700),solidHeader = TRUE,collapsible = TRUE)
+                        plotlyOutput("plot6", height = 700),solidHeader = TRUE,collapsible = TRUE)
                     
                 ) 
             }else{
@@ -207,7 +208,7 @@ output$table1 <- renderPlot({
                         title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8,
                         fluidRow(
                             column(plotlyOutput("plot2",height = 700),width = 6),
-                            column(plotOutput("table1"),width = 6)
+                            column(plotOutput("plot3",height = 700),width = 6)
                         ))
                 )    
             }
