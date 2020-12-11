@@ -93,7 +93,7 @@ ui <- dashboardPage(
 
 server <- function(input, output,session) {
 
-#Reactives de tablas 
+#Reactives de tablas y graficos
 nacional <- reactive({
     tabla1 <- datos
     tabla1
@@ -109,6 +109,11 @@ grafico2 <- reactive({
     graph2 <- nacional() %>% filter(`Estado Actual`=="Activa") %>% group_by(Provincia) %>% summarise(Licenciatarios=n())
     graph2 <- as.data.frame(graph2)
     graph2
+})
+
+
+tabla1 <- reactive({
+    table1 <- datos %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n()) %>% 
 })
 
 #Render de gráficos
