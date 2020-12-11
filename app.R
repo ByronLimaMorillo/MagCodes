@@ -73,8 +73,8 @@ ui <- dashboardPage(
             tabItem(tabName = "indicadores",
                     fluidRow(
                         valueBoxOutput("total_lic"),
-                        valueBoxOutput("lic_activa"),
-                        valueBoxOutput("lic_inactiva")    
+                        valueBoxOutput("lic_activos"),
+                        valueBoxOutput("lic_inactivos")    
                             )
                     
                     
@@ -151,6 +151,7 @@ nacional <- reactive({
     })
     
 #Render de Valuebox
+    
     output$total_lic <- renderValueBox({
         if(!is.null(input$filtro)){
             if(input$filtro!="Nacional"){
@@ -166,8 +167,52 @@ nacional <- reactive({
                 nacional() %>% tally() %>% 
                     valueBox(subtitle = h4("Total De Licenciatarios"),icon = icon("universal-access"),color = "blue") 
             }
-        }else
+        }else{
             valueBox(0,subtitle = h4("Total De Licenciatarios"),icon = icon("universal-access"),color = "blue") 
+        }
+            
+        
+    })
+    
+    
+    output$lic_activos <- renderValueBox({
+        if(!is.null(input$filtro)){
+            if(input$filtro!="Nacional"){
+                if (!is.null(input$cantones)) {
+                    nacional() %>% filter(Provincia %in% input$provincias & Cantón %in% input$cantones & `Estado Actual`=="Activa") %>%  tally() %>% 
+                        valueBox(subtitle = h4("Licenciatarios Activos"),icon = icon("fas fa-check-circle"),color = "light-blue")    
+                }else{
+                    nacional() %>% filter(Provincia %in% input$provincias & `Estado Actual`=="Activa") %>%  tally() %>% 
+                        valueBox(subtitle = h4("Licenciatarios Activos"),icon = icon("fas fa-check-circle"),color = "light-blue") 
+                }
+                
+            }else{
+                nacional() %>% filter(`Estado Actual`=="Activa") %>% tally()  %>% 
+                    valueBox(subtitle = h4("Licenciatarios Activos"),icon = icon("fas fa-check-circle"),color = "light-blue")
+            }
+        }else{
+            valueBox(0,subtitle = h4("Licenciatarios Activos"),icon = icon("fas fa-check-circle"),color = "light-blue")
+        }
+    })
+    
+    output$lic_inactivos <- renderValueBox({
+        if(!is.null(input$filtro)){
+            if(input$filtro!="Nacional"){
+                if (!is.null(input$cantones)) {
+                    nacional() %>% filter(Provincia %in% input$provincias & Cantón %in% input$cantones & `Estado Actual`=="Inactiva") %>%  tally() %>% 
+                        valueBox(subtitle = h4("Licenciatarios Inactivos"),icon = icon("far fa-times-circle"),color = "teal")    
+                }else{
+                    nacional() %>% filter(Provincia %in% input$provincias & `Estado Actual`=="Inactiva") %>%  tally() %>% 
+                        valueBox(subtitle = h4("Licenciatarios Inactivos"),icon = icon("far fa-times-circle"),color = "teal")     
+                }
+                
+            }else{
+                nacional() %>% filter(`Estado Actual`=="Inactiva") %>% tally()  %>% 
+                    valueBox(subtitle = h4("Licenciatarios Inactivos"),icon = icon("far fa-times-circle"),color = "teal")    
+            }
+        }else{
+            valueBox(0,subtitle = h4("Licenciatarios Inactivos"),icon = icon("far fa-times-circle"),color = "teal")    
+        }
         
     })
     
