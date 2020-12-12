@@ -114,7 +114,9 @@ grafico2 <- reactive({
 
 tabla1 <- reactive({
     table1 <- nacional() %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
+    table1$label <- paste0("Licencia Tipo ",table1$`Tipo de licencia (1-7)`)
     table1 <- data.table(table1)
+    
 })
 
 #Render de gráficos y tablas
@@ -139,14 +141,27 @@ output$plot2 <- renderPlotly({
 
 output$plot3 <- renderPlot({
     
-    ggplot(tabla1(), aes(`Tipo de licencia (1-7)`,Provincia, fill=Licenciatarios)) + 
-        geom_tile() +
-        
+    ggplot(tabla1(), aes(label,Provincia)) + 
+        geom_tile(aes(fill=Licenciatarios)) +
+        geom_text(aes(label=Licenciatarios),colour="white")+
         ggtitle("Detalle De Licencias Por Tipo Y Provincia")+
+        labs(x = "",y="") + 
+        # scale_x_discrete(labels=paste("Licencia Tipo",unique(table1$`Tipo de licencia (1-7)`))) +
         theme(plot.title = element_text(hjust = 0.5,size = 17,face = "bold"))+
-        geom_text(aes(label=tabla1()$Licenciatarios),colour="white")+ 
-        theme(axis.text.x=element_text(size = 15,),axis.text.y=element_text(size = 10))
+        theme(legend.title = element_blank(),
+              axis.text.x = element_text(angle=90,hjust=1,vjust=1.0),
+              axis.text.y = element_text(size = 10),
+              panel.background = element_blank(),
+              legend.position = "none")
     
+    # ggplot(tabla1(), aes(`Tipo de licencia (1-7)`,Provincia, fill=Licenciatarios)) + 
+    #     geom_tile() +
+    #     
+    #     ggtitle("Detalle De Licencias Por Tipo Y Provincia")+
+    #     theme(plot.title = element_text(hjust = 0.5,size = 17,face = "bold"))+
+    #     geom_text(aes(label=tabla1()$Licenciatarios),colour="white")+ 
+    #     theme(axis.text.x=element_text(size = 15,),axis.text.y=element_text(size = 10))
+    # 
 })
 
     
