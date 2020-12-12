@@ -109,17 +109,28 @@ grafico1 <- reactive({
 
 grafico2 <- reactive({
     graph2 <- nacional() %>% filter(`Estado Actual`=="Activa") %>% group_by(Provincia) %>% summarise(Licenciatarios=n())
-    graph2 <- as.data.frame(graph2)
+    graph2 <- as.data.frame(graph2[order(graph2$Licenciatarios),])
+    gradient <- colorRampPalette(c("#1fa159","#1f90a1","#1f2aa1","#a11f30"))
+    graph2$colors <- gradient(dim(graph2)[1])[as.numeric(cut(graph2$Licenciatarios,breaks = dim(graph2)[1]))]
     graph2
+    
 })
 
 
+
 tabla1 <- reactive({
-    table1 <- nacional() %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
+    table1 <- nacional() %>% filter(`Estado Actual`=="Activa") %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
     table1$label <- paste0("Licencia Tipo ",table1$`Tipo de licencia (1-7)`)
     table1 <- data.table(table1)
     
 })
+
+tabla456 <- reactive({
+  table456 <- nacional() %>% filter(`Estado Actual`=="Inactiva") %>% group_by(Provincia,Estado) %>% summarise(Licenciatarios=n())  
+  table456 <- as.data.frame(table456)
+  table456
+  })
+
 
 #Render de gráficos y tablas
 
@@ -137,8 +148,9 @@ output$plot1 <- renderPlotly({
 })
 
 output$plot2 <- renderPlotly({
-    plot_ly(grafico2(), labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
-        add_pie(hole = 0.3) %>%
+    plot_ly(grafico2(), labels = ~Provincia, values = ~Licenciatarios, sort = TRUE,
+        textinfo = 'label',marker = list(colors = ~colors),textfont = list(size = 9)) %>%
+        add_pie(hole = 0.6) %>%
         layout(title = "Porcentaje Licenciatarios Nacionales Activos",
                legend = list(orientation = 'h'), 
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
@@ -151,9 +163,8 @@ output$plot3 <- renderPlot({
     ggplot(tabla1(), aes(label,Provincia)) + 
         geom_tile(aes(fill=Licenciatarios)) +
         geom_text(aes(label=Licenciatarios),colour="white")+
-        ggtitle("Detalle De Licencias Por Tipo Y Provincia")+
+        ggtitle("Licencias Activas Por Tipo Y Provincia")+
         labs(x = "",y="") + 
-        # scale_x_discrete(labels=paste("Licencia Tipo",unique(table1$`Tipo de licencia (1-7)`))) +
         theme(plot.title = element_text(hjust = 0.5,size = 17,face = "bold"))+
         theme(legend.title = element_blank(),
               axis.text.x = element_text(angle=90,hjust=1,vjust=1.0),
@@ -161,14 +172,24 @@ output$plot3 <- renderPlot({
               panel.background = element_blank(),
               legend.position = "none")
     
-    # ggplot(tabla1(), aes(`Tipo de licencia (1-7)`,Provincia, fill=Licenciatarios)) + 
-    #     geom_tile() +
-    #     
-    #     ggtitle("Detalle De Licencias Por Tipo Y Provincia")+
-    #     theme(plot.title = element_text(hjust = 0.5,size = 17,face = "bold"))+
-    #     geom_text(aes(label=tabla1()$Licenciatarios),colour="white")+ 
-    #     theme(axis.text.x=element_text(size = 15,),axis.text.y=element_text(size = 10))
-    # 
+   })
+
+
+output$plot456 <- renderPlotly({
+    
+    a <- ggplot(tabla456(),aes(x =Provincia,y = Licenciatarios ,fill = Estado)) + 
+        geom_bar(stat = "identity",position = position_dodge())+
+        labs(x = "") +
+        theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5),legend.position = "top")+
+        # scale_x_discrete(limits = month.abb) +
+        geom_text(aes(label = as.numeric(Licenciatarios)),
+                  position = position_dodge(width = 0.9), 
+                  hjust=100,
+                  size = 3)+
+        scale_fill_manual("", values = hcl.colors(3,palette = "TealGrn",rev = F))
+    
+    ggplotly(a,tooltip = c("Provincia","Licenciatarios","Estado")) %>%  layout(legend = list(orientation = "h", x = 0, y = 10))
+
 })
 
     
@@ -215,27 +236,37 @@ output$plot3 <- renderPlot({
                 fluidRow(
                     box(
                         title = "Licencias Por Tipo Y Provincia",status = 'success',
-                        plotlyOutput("plot4", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                        plotlyOutput("plot7", height = 500),solidHeader = TRUE,collapsible = TRUE),
                     box(
                         title = "Licencias Inactivas Por Provincia",status = 'success',
-                        plotlyOutput("plot5", height = 500),solidHeader = TRUE,collapsible = TRUE),
+                        plotlyOutput("plot8", height = 500),solidHeader = TRUE,collapsible = TRUE),
                     box(
                         title = "Superficie Por Provincia Y Tipo De Licencia",status = 'primary',width = 12,
-                        plotlyOutput("plot6", height = 700),solidHeader = TRUE,collapsible = TRUE)
+                        plotlyOutput("plot9", height = 700),solidHeader = TRUE,collapsible = TRUE)
                     
                 ) 
             }else{
-                fluidRow(
-                    box(
-                        title = "Licenciatarios Por Provincia",status = 'success',
-                        plotlyOutput("plot1", height = 600),solidHeader = TRUE,collapsible = TRUE,width = 5),
-                    box(
-                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 7,
-                        fluidRow(
-                            column(plotlyOutput("plot2",height = 600),width = 6),
-                            column(plotOutput("plot3",height = 600),width = 6)
-                        ))
-                )    
+                fluidPage(
+                    
+                    fluidRow(
+                        box(
+                            title = "Licenciatarios Por Provincia",status = 'success',
+                            plotlyOutput("plot1", height = 600),solidHeader = TRUE,collapsible = TRUE,width = 4),
+                        box(
+                            title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8,
+                            fluidRow(
+                                column(plotlyOutput("plot2",height = 600),width = 6),
+                                column(plotOutput("plot3",height = 600),width = 6))),    
+                    fluidRow(
+                            box(
+                                title = "Licencias Inactivas Por Provincia",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 12,
+                                fluidRow(
+                                    column(plotlyOutput("plot456",height = 600),width = 12)))
+                            )
+                    )
+                    
+                )
+                
             }
             
         }
