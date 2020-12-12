@@ -101,7 +101,9 @@ nacional <- reactive({
 
 grafico1 <- reactive({
     graph1 <- nacional() %>% group_by(Provincia) %>% summarise(Licenciatarios=n())
-    graph1 <- as.data.frame(graph1)
+    graph1 <- as.data.frame(graph1[order(graph1$Licenciatarios),])
+    gradient <- colorRampPalette(c("#1fa159","#1f90a1","#1f2aa1","#a11f30"))
+    graph1$colors <- gradient(dim(graph1)[1])[as.numeric(cut(graph1$Licenciatarios,breaks = dim(graph1)[1]))]
     graph1
 })
 
@@ -122,11 +124,16 @@ tabla1 <- reactive({
 #Render de gráficos y tablas
 
 output$plot1 <- renderPlotly({
-    plot_ly(grafico1(), labels = ~Provincia, values = ~Licenciatarios, sort = F) %>%
-        add_pie(hole = 0.3) %>%
+   
+    
+    plot_ly(grafico1(), labels = ~Provincia, values = ~Licenciatarios, sort = TRUE,
+            textinfo = 'label',marker = list(colors = ~colors),textfont = list(size = 9)) %>%
+        add_pie(hole = 0.6) %>%
         layout(title = "Porcentaje Licenciatarios Nacional",
                legend = list(orientation = 'h'), 
                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+       
 })
 
 output$plot2 <- renderPlotly({
@@ -221,12 +228,12 @@ output$plot3 <- renderPlot({
                 fluidRow(
                     box(
                         title = "Licenciatarios Por Provincia",status = 'success',
-                        plotlyOutput("plot1", height = 700),solidHeader = TRUE,collapsible = TRUE,width = 4),
+                        plotlyOutput("plot1", height = 600),solidHeader = TRUE,collapsible = TRUE,width = 5),
                     box(
-                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 8,
+                        title = "Licencias Activas",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 7,
                         fluidRow(
-                            column(plotlyOutput("plot2",height = 700),width = 6),
-                            column(plotOutput("plot3",height = 700),width = 6)
+                            column(plotlyOutput("plot2",height = 600),width = 6),
+                            column(plotOutput("plot3",height = 600),width = 6)
                         ))
                 )    
             }
