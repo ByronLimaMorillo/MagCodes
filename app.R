@@ -1,6 +1,18 @@
 library(shiny)
 library(shinydashboard)
 source('global.R')
+#Codigo Java para colapsar todos los box
+
+jscode <- "
+shinyjs.expandBox = function(boxid) {
+if (document.getElementById(boxid).parentElement.className.includes('collapsed-box')) {
+$('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
+}};
+shinyjs.collapseBox = function(boxid) {
+if (!document.getElementById(boxid).parentElement.className.includes('collapsed-box')) {
+$('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
+}}"
+
 
 
 ui <- dashboardPage(
@@ -83,7 +95,10 @@ ui <- dashboardPage(
             tabItem(tabName = "acerca",
                     h2("acerca"))
             
-        )
+        ),
+        #Mencionar las funciones Java para colapsar las box
+        useShinyjs(),
+        extendShinyjs(text = jscode,functions =c("toggleBox","expandBox","collapseBox"))
         
         
         
@@ -130,6 +145,26 @@ tabla456 <- reactive({
   table456 <- as.data.frame(table456)
   table456
   })
+
+grafico7 <- reactive({
+    graph7 <- nacional() %>% filter(Provincia %in% input$provincias) %>% 
+        group_by(Provincia,`Estado Actual`,`Tipo de licencia (1-7)`) %>% 
+        summarise(Licenciatarios=n()) %>% 
+        mutate(Tipo=paste0("Licencia Tipo ",`Tipo de licencia (1-7)`))
+    graph7 <- as.data.frame(graph7)
+    graph7
+    
+})
+
+grafico8 <- reactive({
+    graph8 <- nacional() %>% filter(Provincia %in% input$provincias) %>% 
+        group_by(Provincia,`Estado Actual`,`Tipo de licencia (1-7)`) %>% 
+        summarise(Hectáreas=sum(`Área Destinada`)) %>% 
+        mutate(Tipo=paste0("Licencia Tipo ",`Tipo de licencia (1-7)`))
+    graph8 <- as.data.frame(graph8)
+    graph8
+    
+})
 
 
 #Render de gráficos y tablas
@@ -192,6 +227,50 @@ output$plot456 <- renderPlotly({
 
 })
 
+output$plot7 <- renderPlotly({
+    
+    if (!is.null(input$provincias)) {
+        a <- ggplot(grafico7(),aes(x =Tipo,y = Licenciatarios ,fill = `Estado Actual`)) + 
+            geom_bar(stat = "identity",position = position_dodge())+
+            labs(x = "") +
+            theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5),legend.position = "top")+
+            
+            geom_text(aes(label = as.numeric(Licenciatarios)),
+                      position = position_dodge(width = 0.9), 
+                      hjust=100,
+                      size = 3)+
+            scale_fill_manual("", values = hcl.colors(3,palette = "TealGrn",rev = F))+
+            facet_grid(~Provincia)+
+            facet_wrap(~Provincia,ncol = 2 ,nrow = 12)
+            
+        ggplotly(a,tooltip = c("Estado Actual","Licenciatarios")) %>%  layout(legend = list(orientation = "v", x = 10, y = 0))
+        
+    }
+    
+})
+
+output$plot8 <- renderPlotly({
+    
+    if (!is.null(input$provincias)) {
+        a <- ggplot(grafico8(),aes(x =Tipo,y = Hectáreas ,fill = `Estado Actual`)) + 
+            geom_bar(stat = "identity",position = position_dodge())+
+            labs(x = "") +
+            theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5),legend.position = "top")+
+            
+            geom_text(aes(label = as.numeric(Hectáreas)),
+                      position = position_dodge(width = 0.9), 
+                      hjust=100,
+                      size = 3)+
+            scale_fill_manual("", values = hcl.colors(6,palette = "Earth",rev = T))+
+            facet_grid(~Provincia)+
+            facet_wrap(~Provincia,ncol = 2 ,nrow = 12)
+        
+        ggplotly(a,tooltip = c("Estado Actual","Hectáreas")) %>%  layout(legend = list(orientation = "v", x = 10, y = 0))
+        
+    }
+    
+})
+
     
     
 #Desarrollo de Ui's
@@ -219,7 +298,7 @@ output$plot456 <- renderPlotly({
         if (!is.null(input$filtro)) {
             if (input$filtro!="Nacional") {
                 fluidPage(
-                    selectizeInput("provincias","Provincias:",choices=unique(nacional()$Provincia),size=7,multiple=TRUE,width = 200),
+                    selectizeInput("provincias","Provincias:",choices=NULL,size=7,multiple=TRUE,width = 200),
                     selectizeInput("cantones","Cantones:",choices=NULL,size=7,multiple=TRUE,width = 200)
                 )
                 
@@ -234,15 +313,15 @@ output$plot456 <- renderPlotly({
         if(!is.null(input$filtro)){
             if (input$filtro!="Nacional") {
                 fluidRow(
-                    box(
-                        title = "Licencias Por Tipo Y Provincia",status = 'success',
-                        plotlyOutput("plot7", height = 500),solidHeader = TRUE,collapsible = TRUE),
-                    box(
-                        title = "Licencias Inactivas Por Provincia",status = 'success',
-                        plotlyOutput("plot8", height = 500),solidHeader = TRUE,collapsible = TRUE),
-                    box(
-                        title = "Superficie Por Provincia Y Tipo De Licencia",status = 'primary',width = 12,
-                        plotlyOutput("plot9", height = 700),solidHeader = TRUE,collapsible = TRUE)
+                    box(id="box1",
+                        title = "Licenciatarios Por Estado Y Tipo De Licencia",status = 'success',
+                        plotlyOutput("plot7", height = 700),solidHeader = TRUE,collapsible = TRUE,width = 12,collapsed = TRUE),
+                    box(id="box2",
+                        title = "Superficie Destinada Por Estado Y Tipo De Licencia",status = "warning",
+                        plotlyOutput("plot8", height = 500),solidHeader = TRUE,collapsible = TRUE,width = 12,collapsed = TRUE),
+                    box(id="box3",
+                        title = "Licencias Inactivas Por Provincia",status = 'info',width = 12,
+                        plotlyOutput("plot9", height = 700),solidHeader = TRUE,collapsible = TRUE,collapsed = TRUE)
                     
                 ) 
             }else{
@@ -259,7 +338,7 @@ output$plot456 <- renderPlotly({
                                 column(plotOutput("plot3",height = 600),width = 6))),    
                     fluidRow(
                             box(
-                                title = "Licencias Inactivas Por Provincia",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 12,
+                                title = "Licencias Inactivas Por Estado",status = 'success',solidHeader = TRUE,collapsible = TRUE,width = 12,
                                 fluidRow(
                                     column(plotlyOutput("plot456",height = 600),width = 12)))
                             )
@@ -274,11 +353,56 @@ output$plot456 <- renderPlotly({
     
 # Observe de cantones
     
+    observeEvent(input$filtro,{
+        if(input$filtro=="Provincias"){
+            updateSelectizeInput(session,'provincias',
+                                 choices=unique(nacional()$Provincia))
+        }
+    })
     
     observeEvent(input$provincias,{
         updateSelectizeInput(session,'cantones',
                              choices=sort(unique(datos$Cantón[datos$Provincia %in% input$provincias])))
     })
+    #Observe de colpaso de boxes
+    observeEvent(input$provincias,{
+        if(!is.null(input$provincias))
+            {
+            
+            js$expandBox("box1")    
+            
+            
+        }else{
+            js$collapseBox("box1")    
+        }
+             })
+    
+    observeEvent(input$provincias,{
+        if(!is.null(input$provincias))
+        {
+            
+            js$expandBox("box2")    
+            
+            
+        }else{
+            js$collapseBox("box2")    
+        }
+    })
+    observeEvent(input$provincias,{
+        if(!is.null(input$provincias))
+        {
+            
+            js$expandBox("box3")    
+            
+            
+        }else{
+            js$collapseBox("box3")    
+        }
+    })
+    
+    
+    
+    
     
 #Render de Valuebox
     
