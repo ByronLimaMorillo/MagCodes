@@ -1,6 +1,21 @@
 library(shiny)
 library(shinydashboard)
 source('global.R')
+# COMPROBACION DE UN NUMERO NATURAL
+# testInteger <- function(x){
+#   test <- all.equal(x, as.integer(x), check.attributes = FALSE)
+#   a <- x>0
+#   w <- unique(a)
+#   if(length(w)==2){
+#     j <- FALSE
+#   }else{
+#     j <- TRUE
+#   }
+#   if(test == TRUE & j== TRUE ){ return(TRUE) }
+#   else { return(FALSE) }
+# }
+
+
 #Codigo Java para colapsar todos los box
 
 jscode <- "
@@ -29,6 +44,22 @@ ui <- dashboardPage(
         
     ),
     dashboardBody(
+      
+      #Estilo de numeric input (cedula) como caja de texto
+      tags$style(HTML("
+                                       input[type=number] {
+                                       -moz-appearance:textfield;
+                                       }
+                                       input[type=number]::{
+                                       -moz-appearance:textfield;
+                                       }
+                                       input[type=number]::-webkit-outer-spin-button,
+                                       input[type=number]::-webkit-inner-spin-button {
+                                       -webkit-appearance: none;
+                                       margin: 0;
+                                       }
+                                       ")),
+        
         tags$head(tags$style(HTML('
                           /* Imagen de header */
                               .skin-blue .main-header .navbar {
@@ -74,11 +105,7 @@ ui <- dashboardPage(
                                 }
                                 
                                 
-                                /* tamaño de gauge */
-                                       .html-widget.gauge svg {
-                                        height: 300px;
-                                        width:  400px;
-                                        }
+                                
                                   '))),
         
         tabItems(
@@ -182,6 +209,12 @@ grafico10 <- reactive({
     graph10 <- as.data.frame(graph10)
     graph10
 })
+
+
+#Reactive para validación de cédula
+dni <- reactive({
+  validate(need(is.numeric(input$cedula),"Por favor ingrese solo números"))})
+output$mensaje1 <- renderPrint({dni()})
 
 
 
@@ -351,8 +384,9 @@ output$plot10 <- renderPlotly({
         } else{
             if (input$menu=="buscador") {
                 fluidPage(
-                    textInput("nombre","Nombres:"),
-                    textInput("apellido","Apellidos:"),
+                    textInput("nombres","Nombres/Apellidos:"),
+                    numericInput("cedula","Cédula:",min = 0,value = NULL),
+                    verbatimTextOutput("mensaje1")
                 )
             }
         }
@@ -502,6 +536,26 @@ output$plot10 <- renderPlotly({
             js$collapseBox("box4")    
         }
     })
+  
+#Observe para validación de cédula
+    
+    observeEvent(input$cedula, {
+      updateNumericInput(session,"cedula", value = ({
+        if(!is.numeric(input$cedula))
+        {""}
+        else if(!(is.null(input$cedula) || is.na(input$cedula))){
+          if(input$cedula <= 0){
+            ""
+          }else{
+            return (isolate(input$cedula))
+          }
+        }
+        else{1}
+      })
+      )
+    })
+    
+    
     
     
     
