@@ -131,8 +131,6 @@ grafico2 <- reactive({
     
 })
 
-
-
 tabla1 <- reactive({
     table1 <- nacional() %>% filter(`Estado Actual`=="Activa") %>% group_by(Provincia,`Tipo de licencia (1-7)`) %>% summarise(Licenciatarios=n())
     table1$label <- paste0("Licencia Tipo ",table1$`Tipo de licencia (1-7)`)
