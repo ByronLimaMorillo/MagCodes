@@ -176,6 +176,16 @@ grafico9 <- reactive({
 })
 
 
+grafico10 <- reactive({
+    graph10 <- nacional() %>% filter(Cantón %in% input$cantones) %>% 
+        group_by(Cantón,`Estado Actual`,`Tipo de licencia (1-7)`) %>% 
+        summarise(Hectáreas=sum(`Área Destinada`)) %>% 
+        mutate(Tipo=paste0("Licencia Tipo ",`Tipo de licencia (1-7)`))
+    graph10 <- as.data.frame(graph10)
+    graph10
+})
+
+
 
 
 
@@ -300,6 +310,28 @@ output$plot9 <- renderPlotly({
             facet_wrap(~Cantón,ncol = 2 ,nrow = 12)
         
         ggplotly(a,tooltip = c("Estado Actual","Licenciatarios")) %>%  layout(legend = list(orientation = "v", x = 10, y = 0))
+        
+    }
+    
+})
+
+output$plot10 <- renderPlotly({
+    
+    if (!is.null(input$cantones)) {
+        a <- ggplot(grafico10(),aes(x =Tipo,y = Hectáreas ,fill = `Estado Actual`)) + 
+            geom_bar(stat = "identity",position = position_dodge())+
+            labs(x = "") +
+            theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5),legend.position = "top")+
+            
+            geom_text(aes(label = as.numeric(Hectáreas)),
+                      position = position_dodge(width = 0.9), 
+                      hjust=100,
+                      size = 3)+
+            scale_fill_manual("", values = hcl.colors(6,palette = "Earth",rev = T))+
+            facet_grid(~Cantón)+
+            facet_wrap(~Cantón,ncol = 2 ,nrow = 12)
+        
+        ggplotly(a,tooltip = c("Estado Actual","Hectáreas")) %>%  layout(legend = list(orientation = "v", x = 10, y = 0))
         
     }
     
