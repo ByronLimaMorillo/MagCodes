@@ -45,7 +45,7 @@ ui <- dashboardPage(
     ),
     dashboardBody(
       
-      
+      tags$head(tags$style(".shiny-output-error{color: white;}")),
       
       
       #Estilo de numeric input (cedula) como caja de texto
@@ -240,11 +240,13 @@ consulta <- reactive({
     search <- as.data.frame(search)
     search  
   
-  
-  
 })
 
-
+consulta_cedula <- reactive({
+  search_cedula <- nacional() %>% filter(RUC==input$cedula) %>% select(`Nombre, razón social`,Provincia,Cantón,`Estado Actual`,`Tipo de licencia (1-7)`,`Número de licencia`,Estado,RUC)
+  search_cedula <- as.data.frame(search_cedula)
+  search_cedula
+  })
 
 #Render de gráficos y tablas
 
@@ -512,7 +514,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$filtro2!="Nombres") {
           
             fluidPage(
-              numericInput("cedula","Cédula:",min = 0,value = NULL,width = 200),
+              numericInput("cedula","Cédula:",min = 0,value = 0,width = 200),
               textOutput("mensaje1")
             )    
           
@@ -535,16 +537,24 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$filtro2!="Nombres") {
           
           fluidRow(
-            valueBoxOutput("num_licencia2"),
-            valueBoxOutput("estado_licencia2"),
-            valueBoxOutput("tipo_licencia2"),
-            column(valueBoxOutput("inac_licencia2"),width = 11,offset = 4)
+            box(title = "Búsqueda De Licenciatarios Por Cédula",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
+              fluidRow(
+                
+                valueBoxOutput("num_licencia2"),
+                valueBoxOutput("estado_licencia2"),
+                valueBoxOutput("tipo_licencia2"),
+                valueBoxOutput("inac_licencia2")
+              )
+              
+              
+            )
+            
             
           )
         }else{
           fluidRow(
                   box(
-                    title = "Busqueda De Licenciatarios",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
+                    title = "Busqueda De Licenciatarios Por Nombres",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
                     uiOutput("u_i6"),
                     column(dataTableOutput("busqueda"),width = 12))
 
@@ -649,7 +659,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if(!is.numeric(input$cedula))
         {""}
         else if(!(is.null(input$cedula) || is.na(input$cedula))){
-          if(input$cedula <= 0){
+          if(input$cedula < 0){
             ""
           }else{
             if(input$cedula>as.numeric(2499999999)){
@@ -752,15 +762,59 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
     output$inac_licencia <- renderValueBox({
       
         
-          if (consulta()$`Estado Actual`[input$busqueda_rows_selected]!="Activa") {
+          if (consulta()$Estado[input$busqueda_rows_selected]!="Activa") {
             valueBox(consulta()$Estado[input$busqueda_rows_selected],subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon")   
           }    
           
     })
     
     output$num_licencia2 <- renderValueBox({
-      valueBox(input$cedula,subtitle = h4("Número De Licencia"),icon = icon("far fa-hashtag"),color = "yellow") 
+      if (!is.null(input$cedula)) {
+        if (!is_empty(consulta_cedula()$`Número de licencia`)) {
+        valueBox(consulta_cedula()$`Número de licencia`,subtitle = h4("Número De Licencia"),icon = icon("far fa-hashtag"),color = "yellow")   
+      }else{
+        valueBox("Sin Número",subtitle = h4("Número De Licencia"),icon = icon("far fa-hashtag"),color = "yellow")   
+      }}
+      
+      
     })
+    
+    output$estado_licencia2 <- renderValueBox({
+      if (!is.null(input$cedula)) {
+        if (!is_empty(consulta_cedula()$`Estado Actual`)) {
+          if (consulta_cedula()$`Estado Actual`=="Activa") {
+            valueBox(consulta_cedula()$`Estado Actual`,subtitle = h4("Estado De Licencia"),icon = icon("far fa-id-badge"),color = "green") 
+          }else{
+            valueBox(consulta_cedula()$`Estado Actual`,subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+          }  
+        }else{
+          valueBox("Sin Estado",subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+        }  
+        }
+        
+    })
+    
+    output$tipo_licencia2 <- renderValueBox({
+      if (!is.null(input$cedula)) {
+        if (!is_empty(consulta_cedula()$`Tipo de licencia (1-7)`)) {
+      valueBox(consulta_cedula()$`Tipo de licencia (1-7)`,subtitle = h4("Tipo De Licencia"),icon = icon("far fa-chalkboard-teacher"),color = "teal") 
+        }else{
+          valueBox("Sin Tipo",subtitle = h4("Tipo De Licencia"),icon = icon("far fa-chalkboard-teacher"),color = "teal")
+        }}
+          })
+    
+    output$inac_licencia2<- renderValueBox({
+      if (!is.null(input$cedula)) {
+        if (!is_empty(consulta_cedula()$Estado)) {
+          if (consulta_cedula()$Estado!="Activa") {
+            valueBox(consulta_cedula()$Estado,subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon") 
+          } 
+      }
+      }
+         
+        
+    })
+    
     
     
 }
