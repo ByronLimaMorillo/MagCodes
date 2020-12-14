@@ -45,6 +45,9 @@ ui <- dashboardPage(
     ),
     dashboardBody(
       
+      
+      
+      
       #Estilo de numeric input (cedula) como caja de texto
       tags$style(HTML("
                                        input[type=number] {
@@ -61,6 +64,9 @@ ui <- dashboardPage(
                                        ")),
         
         tags$head(tags$style(HTML('
+                           
+                          
+                          
                           /* Imagen de header */
                               .skin-blue .main-header .navbar {
                               height: 100px;
@@ -104,7 +110,7 @@ ui <- dashboardPage(
                                  text-align: center;
                                 }
                                 
-                                
+                                 
                                 
                                   '))),
         
@@ -118,7 +124,10 @@ ui <- dashboardPage(
                     uiOutput("u_i3")
                     ),
             tabItem(tabName = "buscador",
-                    h2("buscador")),
+                    fluidRow(
+                      uiOutput("u_i4")
+                    )
+                    ),
             tabItem(tabName = "acerca",
                     h2("acerca"))
             
@@ -213,10 +222,19 @@ grafico10 <- reactive({
 
 #Reactive para validación de cédula
 dni <- reactive({
-  validate(need(is.numeric(input$cedula),"Por favor ingrese solo números"))})
+  validate(need(is.numeric(input$cedula),"Ingrese solo números"))})
 output$mensaje1 <- renderPrint({dni()})
 
+#Reactive para tabla consulta de licenciatarios
 
+consulta <- reactive({
+    search <- nacional() %>% filter(grepl(input$nombres,`Nombre, razón social`, ignore.case = TRUE)) %>% select(`Nombre, razón social`,Provincia,Cantón,`Estado Actual`,`Tipo de licencia (1-7)`,`Número de licencia`,Estado)
+    search <- as.data.frame(search)
+    search  
+  
+  
+  
+})
 
 
 
@@ -368,11 +386,19 @@ output$plot10 <- renderPlotly({
     
 })
 
-    
+output$busqueda <- renderDataTable({
+  if(input$nombres!=""){
+  datatable(select(consulta(),1:5), escape=FALSE,rownames = FALSE,style = "bootstrap4",selection = "single",options = list(
+    columnDefs = list(list(className = 'dt-center', targets = 0:4))
+  ))
+  }
+})   
     
 #Desarrollo de Ui's
+
+ 
     
-    output$u_i1<- renderUI({        #ui de menu indicadores o buscador
+output$u_i1<- renderUI({        #ui de menu indicadores o buscador
         if (input$menu=="indicadores") {
             fluidPage(
                 style = "position: fixed; overflow: visible;",
@@ -384,9 +410,10 @@ output$plot10 <- renderPlotly({
         } else{
             if (input$menu=="buscador") {
                 fluidPage(
-                    textInput("nombres","Nombres/Apellidos:"),
+                    textInput("nombres","Nombres/Apellidos:",value = NULL),
                     numericInput("cedula","Cédula:",min = 0,value = NULL),
                     verbatimTextOutput("mensaje1")
+                    
                 )
             }
         }
@@ -471,6 +498,39 @@ output$plot10 <- renderPlotly({
         }
     })
     
+    output$u_i4 <- renderUI({   #UI para tabla de busqueda o para mostrar indicadores en caso de busqueda directa por cedula
+      if (!is.null(input$nombres)) {
+        fluidRow(
+          box(
+            title = "Busqueda De Licenciatarios",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
+            uiOutput("u_i5"),
+            column(dataTableOutput("busqueda"),width = 12))
+          
+          )
+        
+        
+      }
+      
+    })
+    
+    
+    output$u_i5 <- renderUI({
+      fila <- input$busqueda_rows_selected
+      if (length(fila)) {
+        box(
+          title = "Detalle De Licencia",status = "success",solidHeader = FALSE,collapsible = TRUE,width = 12,
+                          valueBoxOutput("num_licencia"),
+                          valueBoxOutput("estado_licencia"),
+                          valueBoxOutput("tipo_licencia"),
+                      column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
+        )
+      }
+    })
+    
+    
+  
+    
+    
 # Observe de cantones
     
     observeEvent(input$filtro,{
@@ -547,18 +607,18 @@ output$plot10 <- renderPlotly({
           if(input$cedula <= 0){
             ""
           }else{
-            return (isolate(input$cedula))
+            if(input$cedula>as.numeric(2499999999)){
+            ""  
+            }else{
+              return (input$cedula)
+            }
+            
           }
         }
         else{1}
       })
       )
     })
-    
-    
-    
-    
-    
     
 #Render de Valuebox
     
@@ -626,6 +686,36 @@ output$plot10 <- renderPlotly({
         
     })
     
+    
+    output$num_licencia <- renderValueBox({
+      valueBox(consulta()$`Número de licencia`[input$busqueda_rows_selected],subtitle = h4("Número De Licencia"),icon = icon("far fa-hashtag"),color = "yellow") 
+    })
+    
+    output$estado_licencia <- renderValueBox({
+      if (consulta()$`Estado Actual`[input$busqueda_rows_selected]=="Activa") {
+        valueBox(consulta()$`Estado Actual`[input$busqueda_rows_selected],subtitle = h4("Estado De Licencia"),icon = icon("far fa-id-badge"),color = "green") 
+      }else{
+        valueBox(consulta()$`Estado Actual`[input$busqueda_rows_selected],subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+      }
+      
+    })
+    
+    output$tipo_licencia <- renderValueBox({
+      valueBox(consulta()$`Tipo de licencia (1-7)`[input$busqueda_rows_selected],subtitle = h4("Tipo De Licencia"),icon = icon("far fa-chalkboard-teacher"),color = "teal") 
+    })
+    
+    output$inac_licencia <- renderValueBox({
+      
+        
+          if (consulta()$`Estado Actual`[input$busqueda_rows_selected]!="Activa") {
+            valueBox(consulta()$Estado[input$busqueda_rows_selected],subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon")   
+          }    
+          
+        
+      
+      
+      
+    })
     
     
 }
