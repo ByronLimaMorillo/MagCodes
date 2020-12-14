@@ -538,12 +538,24 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           
           fluidRow(
             box(title = "Búsqueda De Licenciatarios Por Cédula",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
-              fluidRow(
+              splitLayout(
+                fluidPage(
+                  box(title = "Datos De Licenciatario",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 10)
+                ),
                 
-                valueBoxOutput("num_licencia2"),
-                valueBoxOutput("estado_licencia2"),
-                valueBoxOutput("tipo_licencia2"),
-                valueBoxOutput("inac_licencia2")
+                  box(title = "Detalle De Licencia",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 12,
+                      verticalLayout(
+                        
+                        column(valueBoxOutput("num_licencia2"),offset = 2,width = 12),
+                        column(valueBoxOutput("estado_licencia2"),offset = 2,width = 12),  
+                        column(valueBoxOutput("tipo_licencia2"),offset = 2,width = 12),
+                        column(valueBoxOutput("inac_licencia2"),offset = 2,width = 12 )
+                  )
+                    
+                  
+                  
+                )
+                
               )
               
               
