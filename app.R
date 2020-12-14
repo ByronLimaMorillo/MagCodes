@@ -514,7 +514,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$filtro2!="Nombres") {
           
             fluidPage(
-              numericInput("cedula","Cédula:",min = 0,value = 0,width = 200),
+              numericInput("cedula","Cédula:",min = 0,value = NULL,width = 200),
               textOutput("mensaje1")
             )    
           
