@@ -36,7 +36,7 @@ ui <- dashboardPage(
                                   </div>")),
     dashboardSidebar(
         sidebarMenu(id = "menu",
-                    menuItem("INDICADORES", tabName = "indicadores",icon = icon("fas fa-tachometer-alt")),
+                    menuItem("REPORTEADOR", tabName = "indicadores",icon = icon("fas fa-chart-bar")),
                     menuItem("BUSCADOR", tabName = "buscador", icon = icon("search")),
                     menuItem("ACERCA DE",tabName = "acerca",icon = icon("question"), selected = TRUE)),
         hr(),
@@ -65,6 +65,13 @@ ui <- dashboardPage(
         
         tags$head(tags$style(HTML('
                            
+          .form-control {
+            border-radius: 4px 4px 4px 4px;
+        }
+
+        
+
+        
                           
                           
                           /* Imagen de header */
@@ -125,7 +132,8 @@ ui <- dashboardPage(
                     ),
             tabItem(tabName = "buscador",
                     fluidRow(
-                      uiOutput("u_i4")
+                      uiOutput("u_i5"),
+                      
                     )
                     ),
             tabItem(tabName = "acerca",
@@ -222,8 +230,8 @@ grafico10 <- reactive({
 
 #Reactive para validación de cédula
 dni <- reactive({
-  validate(need(is.numeric(input$cedula),"Ingrese solo números"))})
-output$mensaje1 <- renderPrint({dni()})
+  validate(need(is.numeric(input$cedula),"             Ingrese solo números"))})
+output$mensaje1 <- renderText({dni()})
 
 #Reactive para tabla consulta de licenciatarios
 
@@ -398,28 +406,29 @@ output$busqueda <- renderDataTable({
 
  
     
-output$u_i1<- renderUI({        #ui de menu indicadores o buscador
+output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$menu=="indicadores") {
             fluidPage(
                 style = "position: fixed; overflow: visible;",
-                h5(icon("dashboard"),"Dashboard:"),
-                radioButtons("filtro","Filtros",choices = c("Nacional"="Nacional","Provincial"="Provincias","Cantonal"="Cantones"),inline = FALSE,selected = character(0)),
+                h5(icon("fas fa-chart-bar"),"Reporteador:"),
+                radioButtons("filtro","Filtros:",choices = c("Nacional"="Nacional","Provincial"="Provincias","Cantonal"="Cantones"),inline = FALSE,selected = character(0)),
                 uiOutput("u_i2"),
                 br()
             )
         } else{
             if (input$menu=="buscador") {
                 fluidPage(
-                    textInput("nombres","Nombres/Apellidos:",value = NULL),
-                    numericInput("cedula","Cédula:",min = 0,value = NULL),
-                    verbatimTextOutput("mensaje1")
+                  h5(icon("fas fa-search"),"Buscador:"),
+                  style = "position: fixed; overflow: visible;",
+                  radioButtons("filtro2","Búsqueda Por:",choices = c("Nombres"="Nombres","Cédula"="Cedula"),inline = FALSE,selected = character(0)),
+                    uiOutput("u_i4")
                     
                 )
             }
         }
     })
     
-    output$u_i2 <- renderUI({   #ui de filtro
+    output$u_i2 <- renderUI({   #UI de filtro de nacional, provincial y cantonal (Reporteador)
         if (!is.null(input$filtro)) {
             if (input$filtro!="Nacional") {
                 if(input$filtro!="Provincias"){
@@ -442,7 +451,7 @@ output$u_i1<- renderUI({        #ui de menu indicadores o buscador
     })
     
     
-    output$u_i3 <- renderUI({   #ui de box de acuerdo a opcion de filtro
+    output$u_i3 <- renderUI({   #UI ligado con ui2 para mostrar gráficos de Menú Reporteador
         if(!is.null(input$filtro)){
             if (input$filtro!="Nacional") {
                 if (input$filtro!="Provincias") {
@@ -498,33 +507,69 @@ output$u_i1<- renderUI({        #ui de menu indicadores o buscador
         }
     })
     
-    output$u_i4 <- renderUI({   #UI para tabla de busqueda o para mostrar indicadores en caso de busqueda directa por cedula
-      if (!is.null(input$nombres)) {
-        fluidRow(
-          box(
-            title = "Busqueda De Licenciatarios",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
-            uiOutput("u_i5"),
-            column(dataTableOutput("busqueda"),width = 12))
+    output$u_i4 <- renderUI({  #UI de filtro de cedula y nombres (Buscador)
+      if (!is.null(input$filtro2)) {
+        if (input$filtro2!="Nombres") {
           
-          )
-        
+            fluidPage(
+              numericInput("cedula","Cédula:",min = 0,value = NULL,width = 200),
+              textOutput("mensaje1")
+            )    
+          
+        }else{
+          textInput("nombres","Nombres/Apellidos:",value = NULL,width = 220)
+          
+        }
         
       }
+      
       
     })
     
     
-    output$u_i5 <- renderUI({
+    
+    
+    output$u_i5 <- renderUI({   #UI ligado con ui4 para mostrar consulta de nombre y cedula ligado a UI3
+      
+      if(!is.null(input$filtro2)){
+        if (input$filtro2!="Nombres") {
+          
+          fluidRow(
+            valueBoxOutput("num_licencia2"),
+            valueBoxOutput("estado_licencia2"),
+            valueBoxOutput("tipo_licencia2"),
+            column(valueBoxOutput("inac_licencia2"),width = 11,offset = 4)
+            
+          )
+        }else{
+          fluidRow(
+                  box(
+                    title = "Busqueda De Licenciatarios",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
+                    uiOutput("u_i6"),
+                    column(dataTableOutput("busqueda"),width = 12))
+
+                  )
+          
+        }
+        
+        }
+      
+      
+    })
+    
+    
+    output$u_i6 <- renderUI({  # UI ligado a UI5 para mostrar el detalle de la busqueda por nombre
       fila <- input$busqueda_rows_selected
       if (length(fila)) {
         box(
           title = "Detalle De Licencia",status = "success",solidHeader = FALSE,collapsible = TRUE,width = 12,
-                          valueBoxOutput("num_licencia"),
-                          valueBoxOutput("estado_licencia"),
-                          valueBoxOutput("tipo_licencia"),
-                      column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
+          valueBoxOutput("num_licencia"),
+          valueBoxOutput("estado_licencia"),
+          valueBoxOutput("tipo_licencia"),
+          column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
         )
       }
+      
     })
     
     
@@ -711,10 +756,10 @@ output$u_i1<- renderUI({        #ui de menu indicadores o buscador
             valueBox(consulta()$Estado[input$busqueda_rows_selected],subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon")   
           }    
           
-        
-      
-      
-      
+    })
+    
+    output$num_licencia2 <- renderValueBox({
+      valueBox(input$cedula,subtitle = h4("Número De Licencia"),icon = icon("far fa-hashtag"),color = "yellow") 
     })
     
     
