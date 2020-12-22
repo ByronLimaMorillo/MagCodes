@@ -31,8 +31,10 @@ $('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
 
 
 ui <- dashboardPage(
-    dashboardHeader(title = HTML("<div style>
-                                  <img src = ' https://iili.io/J0gVXp.png' width='150' height = '70'  >
+    dashboardHeader(
+
+      title = HTML("<div style>
+                                  <img src = 'https://iili.io/K1d1J1.png' width='160' height = '90'  >
                                   </div>")),
     dashboardSidebar(
         sidebarMenu(id = "menu",
@@ -77,7 +79,7 @@ ui <- dashboardPage(
                           /* Imagen de header */
                               .skin-blue .main-header .navbar {
                               height: 100px;
-                              background-image:url("https://iili.io/J0cEDQ.png?format=1w");
+                              background-image:url("https://iili.io/K1dc0B.jpg");
                               background-size: 1700px 100px;
                               background-repeat: no-repeat;
                               
