@@ -30,7 +30,7 @@ $('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
 
 
 
-ui <- dashboardPage(
+ui <- dashboardPage(title="Licenciatarios de Cáñamo - MAG",
     dashboardHeader(
 
       title = HTML("<div style>
