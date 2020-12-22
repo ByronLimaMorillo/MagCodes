@@ -30,7 +30,7 @@ $('#' + boxid).closest('.box').find('[data-widget=collapse]').click();
 
 
 
-ui <- dashboardPage(title="Licenciatarios de Cáñamo - MAG",
+ui <- dashboardPage(title="Cáñamo-MAG",
     dashboardHeader(
 
       title = HTML("<div style>
@@ -47,7 +47,7 @@ ui <- dashboardPage(title="Licenciatarios de Cáñamo - MAG",
     ),
     dashboardBody(
       #Icono en tab de browser
-      tags$link(rel = "icon", type = "image/gif", href = "https://iili.io/K12fmg.png"),
+      tags$link(rel = "icon", type = "image/gif", href = "https://iili.io/K12u2I.png"),
       
       # Letras de error color blanco
       tags$head(tags$style(".shiny-output-error{color: white;}")),
