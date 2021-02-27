@@ -427,7 +427,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
                 fluidPage(
                   h5(icon("fas fa-search"),"Buscador:"),
                   style = "position: fixed; overflow: visible;",
-                  radioButtons("filtro2","Búsqueda Por:",choices = c("Nombres"="Nombres","Cédula"="Cedula"),inline = FALSE,selected = character(0)),
+                  radioButtons("filtro2","Búsqueda Por:",choices = c("Nombres"="Nombres","RUC"="Cedula"),inline = FALSE,selected = character(0)),
                     uiOutput("u_i4")
                     
                 )
@@ -519,7 +519,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$filtro2!="Nombres") {
           
             fluidPage(
-              numericInput("cedula","Cédula:",min = 0,value = NULL,width = 200),
+              numericInput("cedula","RUC:",min = 0,value = NULL,width = 200),
               textOutput("mensaje1")
             )    
           
@@ -542,7 +542,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         if (input$filtro2!="Nombres") {
           
           fluidRow(
-            box(title = "Búsqueda De Licenciatarios Por Cédula",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
+            box(title = "Búsqueda De Licenciatarios Por RUC",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
               splitLayout(
                 fluidPage(
                   box(title = "Datos De Licenciatario",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 10)
@@ -551,10 +551,10 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
                   box(title = "Detalle De Licencia",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 12,
                       verticalLayout(
                         
-                        column(valueBoxOutput("num_licencia2"),offset = 2,width = 12),
-                        column(valueBoxOutput("estado_licencia2"),offset = 2,width = 12),  
-                        column(valueBoxOutput("tipo_licencia2"),offset = 2,width = 12),
-                        column(valueBoxOutput("inac_licencia2"),offset = 2,width = 12 )
+                        valueBoxOutput("num_licencia2",width = 12),
+                        valueBoxOutput("estado_licencia2",width = 12),
+                        valueBoxOutput("tipo_licencia2",width = 12)
+                        # column(valueBoxOutput("inac_licencia2"),offset = 2,width = 12 )
                   )
                     
                   
@@ -592,7 +592,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           title = "Detalle De Licencia",status = "success",solidHeader = FALSE,collapsible = TRUE,width = 12,
           valueBoxOutput("num_licencia"),
           valueBoxOutput("estado_licencia"),
-          valueBoxOutput("tipo_licencia"),
+          valueBoxOutput("tipo_licencia")
           # column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
         )
       }
@@ -679,6 +679,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           if(input$cedula < 0){
             ""
           }else{
+            # if(input$cedula>as.numeric(2500000000001)){
             if(input$cedula>as.numeric(2499999999)){
             ""  
             }else{
@@ -804,7 +805,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           if (consulta_cedula()$`Estado Actual`=="Activa") {
             valueBox(consulta_cedula()$`Estado Actual`,subtitle = h4("Estado De Licencia"),icon = icon("far fa-id-badge"),color = "green") 
           }else{
-            valueBox(consulta_cedula()$`Estado Actual`,subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+            valueBox(paste0(consulta_cedula()$`Estado Actual`,"-",consulta_cedula()$Estado),subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
           }  
         }else{
           valueBox("Sin Estado",subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
@@ -822,17 +823,17 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         }}
           })
     
-    output$inac_licencia2<- renderValueBox({
-      if (!is.null(input$cedula)) {
-        if (!is_empty(consulta_cedula()$Estado)) {
-          if (consulta_cedula()$Estado!="Activa") {
-            valueBox(consulta_cedula()$Estado,subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon") 
-          } 
-      }
-      }
-         
-        
-    })
+    # output$inac_licencia2<- renderValueBox({
+    #   if (!is.null(input$cedula)) {
+    #     if (!is_empty(consulta_cedula()$Estado)) {
+    #       if (consulta_cedula()$Estado!="Activa") {
+    #         valueBox(consulta_cedula()$Estado,subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon") 
+    #       } 
+    #   }
+    #   }
+    #      
+    #     
+    # })
     
     
     
