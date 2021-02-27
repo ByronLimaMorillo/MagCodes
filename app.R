@@ -593,7 +593,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           valueBoxOutput("num_licencia"),
           valueBoxOutput("estado_licencia"),
           valueBoxOutput("tipo_licencia"),
-          column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
+          # column(valueBoxOutput("inac_licencia"),width = 11,offset = 4)    
         )
       }
       
@@ -767,7 +767,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
       if (consulta()$`Estado Actual`[input$busqueda_rows_selected]=="Activa") {
         valueBox(consulta()$`Estado Actual`[input$busqueda_rows_selected],subtitle = h4("Estado De Licencia"),icon = icon("far fa-id-badge"),color = "green") 
       }else{
-        valueBox(consulta()$`Estado Actual`[input$busqueda_rows_selected],subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+        valueBox(paste0(consulta()$`Estado Actual`[input$busqueda_rows_selected],"-",consulta()$Estado[input$busqueda_rows_selected]),subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
       }
       
     })
@@ -776,14 +776,14 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
       valueBox(consulta()$`Tipo de licencia (1-7)`[input$busqueda_rows_selected],subtitle = h4("Tipo De Licencia"),icon = icon("far fa-chalkboard-teacher"),color = "teal") 
     })
     
-    output$inac_licencia <- renderValueBox({
-      
-        
-          if (consulta()$Estado[input$busqueda_rows_selected]!="Activa") {
-            valueBox(consulta()$Estado[input$busqueda_rows_selected],subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon")   
-          }    
-          
-    })
+    # output$inac_licencia <- renderValueBox({
+    #   
+    #     
+    #       if (consulta()$Estado[input$busqueda_rows_selected]!="Activa") {
+    #         valueBox(consulta()$Estado[input$busqueda_rows_selected],subtitle = h4("Tipo De Inactividad"),icon = icon("far fa-chalkboard-teacher"),color = "maroon")   
+    #       }    
+    #       
+    # })
     
     output$num_licencia2 <- renderValueBox({
       if (!is.null(input$cedula)) {
