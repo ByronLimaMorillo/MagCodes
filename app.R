@@ -545,7 +545,9 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
             box(title = "Búsqueda De Licenciatarios Por RUC",status = 'success',solidHeader = TRUE,collapsible = FALSE,width = 12,
               splitLayout(
                 fluidPage(
-                  box(title = "Datos De Licenciatario",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 10)
+                  box(title = "Datos De Licenciatario",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 10,
+                      fluidPage(uiOutput("u_i_imagen"),
+                               uiOutput("u_i_detalle_licencia")))
                 ),
                 
                   box(title = "Detalle De Licencia",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 12,
@@ -581,6 +583,29 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
         
         }
       
+      
+    })
+    
+    
+    output$u_i_imagen <- renderUI({
+            img(src='title.png', align = "left")
+    })
+    
+    
+    
+    output$u_i_detalle_licencia <- renderUI({
+      htmlOutput("detalle_licencia")
+      
+    })
+    
+    output$detalle_licencia <- renderText({
+      nombre <- paste("<B>Nombres:</B>")
+      provincia <- paste("<B>Provincia:</B>")
+      canton <- paste("<B>Cantón:</B>")
+      fecha_emi <- paste("<B>Fecha De Emisión:</B>")
+      fecha_cad <- paste("<B>Fecha De Caducidad:</B>")
+      
+      HTML(paste(nombre,provincia,canton,fecha_emi,fecha_cad,sep = "<hr/>"))
       
     })
     
