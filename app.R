@@ -767,7 +767,9 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
       if (consulta()$`Estado Actual`[input$busqueda_rows_selected]=="Activa") {
         valueBox(consulta()$`Estado Actual`[input$busqueda_rows_selected],subtitle = h4("Estado De Licencia"),icon = icon("far fa-id-badge"),color = "green") 
       }else{
-        valueBox(paste0(consulta()$`Estado Actual`[input$busqueda_rows_selected],"-",consulta()$Estado[input$busqueda_rows_selected]),subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
+        
+        valueBox(tags$p(paste0(consulta()$`Estado Actual`[input$busqueda_rows_selected],"-",consulta()$Estado[input$busqueda_rows_selected]), style = "font-size: 93%;"),
+                 subtitle = h4("Estado De Licencia"),icon = icon("far fa-ban"),color = "red")   
       }
       
     })
