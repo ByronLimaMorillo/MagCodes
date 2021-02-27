@@ -248,7 +248,7 @@ consulta <- reactive({
 })
 
 consulta_cedula <- reactive({
-  search_cedula <- nacional() %>% filter(RUC==input$cedula) %>% select(`Nombre, razón social`,Provincia,Cantón,`Estado Actual`,`Tipo de licencia (1-7)`,`Número de licencia`,Estado,RUC)
+  search_cedula <- nacional() %>% filter(RUC==input$cedula) %>% select(`Nombre, razón social`,Provincia,Cantón,`Estado Actual`,`Tipo de licencia (1-7)`,`Número de licencia`,Estado,RUC,`Fecha de caducidad`,`Fecha de emisión de la licencia`)
   search_cedula <- as.data.frame(search_cedula)
   search_cedula
   })
@@ -546,8 +546,10 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
               splitLayout(
                 fluidPage(
                   box(title = "Datos De Licenciatario",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 10,
-                      fluidPage(uiOutput("u_i_imagen"),
-                               uiOutput("u_i_detalle_licencia")))
+                      fluidRow(
+                        
+                              column(uiOutput("u_i_imagen"),width = 6),
+                               column(uiOutput("u_i_detalle_licencia"),width = 6)))
                 ),
                 
                   box(title = "Detalle De Licencia",status = "warning",solidHeader = FALSE,collapsible = FALSE,width = 12,
@@ -588,7 +590,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
     
     
     output$u_i_imagen <- renderUI({
-            img(src='title.png', align = "left")
+            img(src='profile2.png', align = "center",width='250',height = '250')
     })
     
     
@@ -599,11 +601,11 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
     })
     
     output$detalle_licencia <- renderText({
-      nombre <- paste("<B>Nombres:</B>")
-      provincia <- paste("<B>Provincia:</B>")
-      canton <- paste("<B>Cantón:</B>")
-      fecha_emi <- paste("<B>Fecha De Emisión:</B>")
-      fecha_cad <- paste("<B>Fecha De Caducidad:</B>")
+      nombre <- paste("<B>Nombres:</B>",'&nbsp;',consulta_cedula()$`Nombre, razón social`)
+      provincia <- paste("<B>Provincia:</B>",'&nbsp;',consulta_cedula()$Provincia)
+      canton <- paste("<B>Cantón:</B>",'&nbsp;',consulta_cedula()$Cantón)
+      fecha_emi <- paste("<B>Fecha De Emisión:</B>",'&nbsp;',consulta_cedula()$`Fecha de emisión de la licencia`)
+      fecha_cad <- paste("<B>Fecha De Caducidad:</B>",'&nbsp;',consulta_cedula()$`Fecha de caducidad`)
       
       HTML(paste(nombre,provincia,canton,fecha_emi,fecha_cad,sep = "<hr/>"))
       
