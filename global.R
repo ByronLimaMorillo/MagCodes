@@ -9,6 +9,7 @@ library(plotly)
 library(ggplot2)
 library(purrr)
 library(tidyr)
-load("datos.RData")
+library(data.table)
+# load("datos.RData")
 
 

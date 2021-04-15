@@ -67,7 +67,7 @@ ui <- dashboardPage(title="Cáñamo-MAG",
                                        margin: 0;
                                        }
                                        ")),
-        
+        #estilos de color en banner, logo, sidebar
         tags$head(tags$style(HTML('
                            
           .form-control {
@@ -156,10 +156,14 @@ ui <- dashboardPage(title="Cáñamo-MAG",
 
 
 server <- function(input, output,session) {
-
+   source('script_conexion.R')
+  
+  
+  
 #Reactives de tablas y graficos
 nacional <- reactive({
-    tabla1 <- datos
+      
+  tabla1 <- as.data.frame(datos)
     tabla1
 })
 
@@ -427,7 +431,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
                 fluidPage(
                   h5(icon("fas fa-search"),"Buscador:"),
                   style = "position: fixed; overflow: visible;",
-                  radioButtons("filtro2","Búsqueda Por:",choices = c("Nombres"="Nombres","RUC"="Cedula"),inline = FALSE,selected = character(0)),
+                  radioButtons("filtro2","Búsqueda Por:",choices = c("Nombre"="Nombres","RUC"="Cedula"),inline = FALSE,selected = character(0)),
                     uiOutput("u_i4")
                     
                 )
@@ -524,7 +528,7 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
             )    
           
         }else{
-          textInput("nombres","Nombres/Apellidos:",value = NULL,width = 220)
+          textInput("nombres","Nombres/Razón Social:",value = NULL,width = 220)
           
         }
         
@@ -706,8 +710,8 @@ output$u_i1<- renderUI({        #UI de menú con radiobuttons
           if(input$cedula < 0){
             ""
           }else{
-            # if(input$cedula>as.numeric(2500000000001)){
-            if(input$cedula>as.numeric(2499999999)){
+            if(input$cedula>as.numeric(2500000000001)){  #para ruc
+            # if(input$cedula>as.numeric(2499999999)){  #para cédula
             ""  
             }else{
               return (input$cedula)
